@@ -1,0 +1,48 @@
+#!/bin/bash
+
+while [ "$1" != "" ]; do
+    case $1 in
+    -a | --appname)
+        shift
+        appname=$1
+        ;;
+    -e | --environment)
+        shift
+        env=${1/\//-} # Replace dấu / thành - để đánh tag name không bị lỗi. ví dụ feature/feature-1 -> feature-feature-1
+        ;;
+    -scope | --scope)
+        shift
+        scope=$1
+        ;;
+    -imageSuffix | --image-suffix)
+        shift
+        suffix=$1
+        ;;
+    -tagOnly | --tag-only)
+        shift
+        tagonly=$1
+        ;;
+    -fromEnvironment | --from-environment)
+        shift
+        fromenv=$1
+        ;;
+    -b | --target-environment_build)
+        shift
+        target_environment_build=$1
+        ;;
+    esac
+    shift
+done
+
+docker login -u $DOCKER_REGISTRY_USER -p $DOCKER_REGISTRY_PASS $DOCKER_REGISTRY_SERVER
+if ! ($tagonly); then
+    docker build --build-arg app_name_lower_case=${appname,,} -f Dockerfile.client.ci -t $DOCKER_REGISTRY_SERVER/$scope/${appname,,}$suffix:$CORE_VERSION-$env .
+    docker push $DOCKER_REGISTRY_SERVER/$scope/${appname,,}$suffix:$CORE_VERSION-$env
+    docker tag $DOCKER_REGISTRY_SERVER/$scope/${appname,,}$suffix:$CORE_VERSION-$env $DOCKER_REGISTRY_SERVER/$scope/${appname,,}$suffix:$CORE_VERSION-$env-$IMAGE_VERSION
+    docker push $DOCKER_REGISTRY_SERVER/$scope/${appname,,}$suffix:$CORE_VERSION-$env-$IMAGE_VERSION
+    docker tag $DOCKER_REGISTRY_SERVER/$scope/${appname,,}$suffix:$CORE_VERSION-$env $DOCKER_REGISTRY_SERVER/$target_environment_build/${appname,,}$suffix:$CORE_VERSION-$env
+    docker push $DOCKER_REGISTRY_SERVER/$target_environment_build/${appname,,}$suffix:$CORE_VERSION-$env
+else
+    docker tag $DOCKER_REGISTRY_SERVER/$scope/${appname,,}$suffix:$CORE_VERSION-$fromenv $DOCKER_REGISTRY_SERVER/$scope/${appname,,}$suffix:$CORE_VERSION-$env-$IMAGE_VERSION
+    docker push $DOCKER_REGISTRY_SERVER/$scope/${appname,,}$suffix:$CORE_VERSION-$env-$IMAGE_VERSION
+fi

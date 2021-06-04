@@ -1,0 +1,5 @@
+before_script:
+  - export LIB_MAJOR_VERSION=$(date +%y%m%d)
+  - export LIB_MINOR_VERSION=$(date +%H%M%S)
+  - export CORE_VERSION="5.0"
+  - export IMAGE_VERSION=$(date +%y%m%d)

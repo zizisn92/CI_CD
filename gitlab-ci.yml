@@ -1,0 +1,14 @@
+image: dockerhub.dttt.vn/docker-with-bash:0.0.1
+
+stages:
+  - stage1
+
+include:
+  - local: /test.yml
+
+test1:
+  stage: stage1
+  rules:
+    - when: always
+  script:
+    - echo "hello world"
