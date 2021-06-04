@@ -1,6 +1,0 @@
-FROM euniversitytnapi/tn.clientbase.angular
-ARG app_name_lower_case
-RUN rm -rf /usr/share/nginx/html/*
-COPY ./dist/${app_name_lower_case} /usr/share/nginx/html
-COPY ./build-config/${app_name_lower_case}/nginx.conf /etc/nginx/
-CMD ["nginx", "-g", "daemon off;"]
