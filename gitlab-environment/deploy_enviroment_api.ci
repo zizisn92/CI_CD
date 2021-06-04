@@ -1,0 +1,59 @@
+#!/bin/bash
+while [ "$1" != "" ]; do
+    case $1 in
+    -a | --appname)
+        shift
+        appname=$1
+        ;;
+    -c | --ci-commit-branch)
+        shift
+        commit_branch=$1
+        ;;
+    -imageSuffix | --image-suffix)
+        shift
+        suffix=$1
+        ;;
+    -s | --ci-commit-description_simple)
+        shift
+         commit_description_simple=$1
+        ;;
+    -d | --target-environment_deploy)
+        shift
+        target_environment_deploy=$1
+        ;;
+    esac
+    shift
+done
+    # # Xử lý lấy biến truyền vào docker
+    #     scopeScource=$(echo $commit_branch | cut -d'-' -f 1)
+    #     scopeTarget=$(echo $commit_branch | cut -d'-' -f 1)
+    #     env=$(echo $commit_branch | cut -d'-' -f 2)
+    #     fromEnv=$commit_description
+    #     if [ "$fromEnv" = "dev" ];
+    #     then
+    #          scopeScource="business"
+    #     else
+    #         fromEnv=$(echo $commit_description | cut -d'-' -f 2)
+    #     fi
+
+    # Xử lý lấy biến truyền vào docker
+        scopeScource=$target_environment_deploy
+        scopeTarget=$target_environment_deploy
+        env=$(echo $commit_branch)
+        fromEnv=$commit_description_simple
+        if [ "$fromEnv" = "dev" ];
+        then
+             scopeScource="business"
+        else
+        echo "aaaa"
+        fi
+
+echo "*****************************************************************************"
+echo "$DOCKER_REGISTRY_SERVER/$scopeScource/${appname,,}$suffix:$CORE_VERSION-$fromEnv"
+echo "$DOCKER_REGISTRY_SERVER/$scopeTarget/${appname,,}$suffix:$CORE_VERSION-$env"
+echo "*****************************************************************************"
+
+docker login -u $DOCKER_REGISTRY_USER -p $DOCKER_REGISTRY_PASS $DOCKER_REGISTRY_SERVER
+docker pull $DOCKER_REGISTRY_SERVER/$scopeScource/${appname,,}$suffix:$CORE_VERSION-$fromEnv
+docker tag $DOCKER_REGISTRY_SERVER/$scopeScource/${appname,,}$suffix:$CORE_VERSION-$fromEnv $DOCKER_REGISTRY_SERVER/$scopeTarget/${appname,,}$suffix:$CORE_VERSION-$env
+docker push $DOCKER_REGISTRY_SERVER/$scopeTarget/${appname,,}$suffix:$CORE_VERSION-$env

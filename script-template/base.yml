@@ -1,0 +1,30 @@
+
+image: dockerhub.dttt.vn/docker-with-bash:0.0.2
+
+stages:
+  - packge-and-publish
+  - docker-build-api
+  - docker-build-client
+  - docker-deploy-api-environment
+  - docker-deploy-client-environment
+
+include:
+  # base gitlab-ci
+  - project: 'gitadmin/gitlabutils'
+    ref: master
+    file: '/script-template/before-script.yml'
+  - project: 'gitadmin/gitlabutils'
+    ref: master
+    file: '/script-template/common.yml'
+  - project: 'gitadmin/gitlabutils'
+    ref: master
+    file: '/script-template/deploy-api-environment.yml'
+  - project: 'gitadmin/gitlabutils'
+    ref: master
+    file: '/script-template/deploy-client-environment.yml'
+  - project: 'gitadmin/gitlabutils'
+    ref: master
+    file: '/script-template/build-image-client.yml'
+  - project: 'gitadmin/gitlabutils'
+    ref: master
+    file: '/script-template/build-image-api.yml'

@@ -1,0 +1,28 @@
+FROM dockerhub.dttt.vn/aspnetcore-with-grpc:5.0 AS base
+ARG service_name_lower_case
+ARG service_name_pascal_case
+WORKDIR /app
+ENV SCOPE__SERVICE=${service_name_lower_case}
+
+FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS build
+ARG service_name_lower_case
+ARG service_name_pascal_case
+WORKDIR /src
+COPY . .
+WORKDIR /src/Services/${service_name_pascal_case}/${service_name_pascal_case}.API
+RUN dotnet restore "${service_name_pascal_case}.API.csproj"
+RUN ls
+RUN dotnet build "${service_name_pascal_case}.API.csproj" -c Release -o /app/build
+
+FROM build AS publish
+ARG service_name_lower_case
+ARG service_name_pascal_case
+RUN dotnet publish "${service_name_pascal_case}.API.csproj" -c Release -o /app/publish
+RUN rm -rf /app/publish/runtimes
+
+FROM base AS final
+ARG service_name_lower_case
+ARG service_name_pascal_case
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "${service_name_pascal_case}.API.dll"]

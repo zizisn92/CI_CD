@@ -1,0 +1,22 @@
+before_script:
+  - export LIB_MAJOR_VERSION=$(date +%y%m%d)
+  - export LIB_MINOR_VERSION=$(date +%H%M%S)
+  - export CORE_VERSION="5.0"
+  - export IMAGE_VERSION=$(date +%y%m%d)
+  # - export APP_PATH=$APP_PATH
+  # - export API_PATH=$API_PATH
+  # - export COMMON_WORKSPACE_NAME=$COMMON_WORKSPACE_NAME
+  - CI_COMMIT_DESCRIPTION_SIMPLE=$(echo $CI_COMMIT_DESCRIPTION | cut -d'*' -f 2)
+  - TARGET_ENVIRONMENT_BUILD=$(echo $CI_COMMIT_MESSAGE | cut -d'*' -f 2)
+  - TARGET_ENVIRONMENT_DEPLOY=$(echo $CI_COMMIT_DESCRIPTION | cut -d'*' -f 3)
+  - echo $CI_COMMIT_MESSAGE
+  - echo $CI_COMMIT_DESCRIPTION
+  - echo $IMAGE_VERSION
+  - echo $LIB_MAJOR_VERSION
+  - echo $LIB_MINOR_VERSION
+  - echo $APP_PATH
+  - echo $API_PATH
+  - echo $CI_COMMIT_BRANCH
+  - echo $CI_COMMIT_DESCRIPTION_SIMPLE
+  - echo $TARGET_ENVIRONMENT_BUILD
+  - echo $TARGET_ENVIRONMENT_DEPLOY

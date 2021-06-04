@@ -1,0 +1,67 @@
+# docker-build-dev:
+#   stage: docker-deploy-api-environment
+#   extends:
+#     - .image-docker-with-bash
+#   rules:
+#     - if: '$CI_COMMIT_BRANCH != "u202001-dev"'
+#       when: never
+#     - if: '$CI_COMMIT_MESSAGE !~ /(\[api\])/'
+#       when: never
+#     - if: '$CI_COMMIT_MESSAGE !~ /(\[all\])/'
+#       when: never
+#     - when: always
+#   script:
+#     - cd $API_PATH
+#     - "bash deploy_enviroment_api.ci -a $MODULE_NAME -c $CI_COMMIT_BRANCH -imageSuffix .client -d $CI_COMMIT_DESCRIPTION_SIMPLE"
+#     - "curl -X POST $WEBHOOK_URL_API_DEV"
+          
+docker-build-test:
+  stage: docker-deploy-api-environment
+  extends:
+    - .image-docker-with-bash
+  rules:
+    - if: '$CI_COMMIT_BRANCH != "test"'
+      when: never
+    - if: '$CI_COMMIT_MESSAGE !~ /(\[api\])/'
+      when: never
+    - when: always
+  script:
+    - cd $API_PATH
+    - "bash deploy_enviroment_api.ci -a $MODULE_NAME -c $CI_COMMIT_BRANCH -imageSuffix .client -s $CI_COMMIT_DESCRIPTION_SIMPLE -d $TARGET_ENVIRONMENT_DEPLOY"
+    - WEBHOOK_URL_API=$(echo "WEBHOOK_URL_API_TEST"_"$TARGET_ENVIRONMENT_DEPLOY")
+    - echo ${!WEBHOOK_URL_API}
+    - "curl -X POST $(echo ${!WEBHOOK_URL_API})"
+
+docker-build-stagging:
+  stage: docker-deploy-api-environment
+  extends:
+    - .image-docker-with-bash
+  rules:
+    - if: '$CI_COMMIT_BRANCH != "stagging"'
+      when: never
+    - if: '$CI_COMMIT_MESSAGE !~ /(\[api\])/'
+      when: never
+    - when: always
+  script:
+    - cd $API_PATH
+    - "bash deploy_enviroment_api.ci -a $MODULE_NAME -c $CI_COMMIT_BRANCH -imageSuffix .client -s $CI_COMMIT_DESCRIPTION_SIMPLE -d $TARGET_ENVIRONMENT_DEPLOY"
+    - WEBHOOK_URL_API=$(echo "WEBHOOK_URL_API_STAGGING"_"$TARGET_ENVIRONMENT_DEPLOY")
+    - echo ${!WEBHOOK_URL_API}
+    - "curl -X POST $(echo ${!WEBHOOK_URL_API})"
+
+docker-build-production:
+  stage: docker-deploy-api-environment
+  extends:
+    - .image-docker-with-bash
+  rules:
+    - if: '$CI_COMMIT_BRANCH != "prod"'
+      when: never
+    - if: '$CI_COMMIT_MESSAGE !~ /(\[api\])/'
+      when: never
+    - when: always
+  script:
+    - cd $API_PATH
+    - "bash deploy_enviroment_api.ci -a docker-build-test -c $CI_COMMIT_BRANCH -imageSuffix .client -s $CI_COMMIT_DESCRIPTION_SIMPLE -d $TARGET_ENVIRONMENT_DEPLOY"
+    - WEBHOOK_URL_API=$(echo "WEBHOOK_URL_API_PROD"_"$TARGET_ENVIRONMENT_DEPLOY")
+    - echo ${!WEBHOOK_URL_API}
+    - "curl -X POST $(echo ${!WEBHOOK_URL_API})"
